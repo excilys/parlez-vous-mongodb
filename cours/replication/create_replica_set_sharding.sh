@@ -1,7 +1,8 @@
 #!/bin/bash
 
 REPL_DIR=/data/mongodb/formation/replication
-LOG_DIR=$(pwd)/logs
+LOG_DIR=~/Desktop/logs
+GENERAL_LOGS=$LOG_DIR/general.log
 PORT_OFFSET=27006
 
 # Kills all existing mongod processus
@@ -26,12 +27,14 @@ for shard in $(seq 2); do
 		NODE_DIR="$SHARD_DIR/node$node"
 		PORT=$((SHARD_PORT + node))
 		mkdir -p $NODE_DIR
-		mongod --fork --replSet $REPL_SET --logpath "$LOG_DIR/$shard.$node.log" --dbpath $NODE_DIR --port $PORT
+		echo "Starting node $node of shard $shard"
+		mongod --fork --replSet $REPL_SET --logpath "$LOG_DIR/$shard.$node.log" --dbpath $NODE_DIR --port $PORT >> $GENERAL_LOGS
 	done
 
 done
 
-mongo --port 27017 << 'EOF'
+echo "Initialize the first shard."
+mongo --port 27017 >> $GENERAL_LOGS << 'EOF'
 	cfg = {
 		'_id' : 'rs1',
 		'members' : [
@@ -44,8 +47,8 @@ mongo --port 27017 << 'EOF'
 	rs.initiate(cfg);
 EOF
 
-
-mongo --port 27027 << 'EOF'
+echo "Initialize the second shard"
+mongo --port 27027 >> $GENERAL_LOGS << 'EOF'
         cfg = {
                 '_id' : 'rs2',
                 'members' : [
@@ -65,16 +68,19 @@ EOF
 # Serveur de configuration
 [[ -d $REPL_DIR/config ]] && rm -r $REPL_DIR/config
 mkdir $REPL_DIR/config
-mongod --port 27020 --fork --logpath $LOG_DIR/config.log --dbpath $REPL_DIR/config --configsvr
+echo "Start a config server for the shard environment."
+mongod --port 27020 --fork --logpath $LOG_DIR/config.log --dbpath $REPL_DIR/config --configsvr >> $GENERAL_LOGS
 
 # Routeur
-mongos --port 27021 --configdb "localhost:27020" --fork --logpath $LOG_DIR/mongos.log --chunkSize 1
+echo "Start a mongos process for the shard environnement (port 27021)"
+mongos --port 27021 --configdb "localhost:27020" --fork --logpath $LOG_DIR/mongos.log --chunkSize 1 >> $GENERAL_LOGS
 
-echo "Go to sleep"
+echo "Sleep for 40 secondes (for each replica set to have a primary node)."
 sleep 40
 
 # Initialization of shards
-mongo --port 27021 << 'EOF'
+echo "Initialize the shard environment"
+mongo --port 27021 >> $GENERAL_LOGS << 'EOF'
 	sh.addShard('rs1/localhost:27017');
 	sh.addShard('rs2/localhost:27027');
 	sh.enableSharding('foo');
@@ -83,3 +89,4 @@ mongo --port 27021 << 'EOF'
 	sh.shardCollection('foo.bar', {'date' : 1});
 EOF
 
+echo "The shard environment is now set up"
