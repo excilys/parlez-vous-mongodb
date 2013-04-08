@@ -1,6 +1,6 @@
 # GridFS
 
-Cette scéance de TP est consacré aux stockage et à la recherche de fichier dans MongoDB grâce à GridFS.
+Cette scéance de TP est consacrée au stockage et à la recherche de fichiers dans MongoDB grâce à GridFS.
 
 ## Déroulement
 
