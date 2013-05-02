@@ -25,7 +25,7 @@ db.visit.group( {
 	initial: { count: 0 }
 });
 
-// 5 - Utiliser une commande map/reduce pour calculer le nombre de visites par type de media
+// 5 - Utiliser une commande map/reduce pour calculer le nombre de visites par type de media. Le résultat sera sauvegardé dans une collection nommmée media_stats.
 var mapFunction, reduceFunction; 
 mapFunction = function () {
 	emit(this.media.type, 1);	
@@ -35,7 +35,7 @@ reduceFunction = function(key, values) {
 	return values.length;
 };
 
-db.visit.mapReduce(mapFunction, reduceFunction, {out : {inline : 1}});
+db.visit.mapReduce(mapFunction, reduceFunction, {out : {replace : 'media_stats'}});
 
 // 6 - Utiliser une commande aggregate pour calculer le nombre de visites par type de media
 db.visit.aggregate(
