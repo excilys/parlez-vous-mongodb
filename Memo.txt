@@ -1,0 +1,45 @@
+
+Mongo
+
+
+Diapo 
+
+
+Fait POM,Model Java,
+
+Peupler la base
+Ajouter le driver mongo (jongo)
+Jquery
+configurationDataSource
+
+
+
+Recherche user (find)
+Save user (inscription) --> Login / pass
+
+GetProduct(id)
+SaveProduct()
+SearchProduct()
+
+AddCommentaire()
+
+AddCommand()
+SearchCommand()
+
+Statistique (agrega/map reduce)
+
+jersey
+
+
+Dynamiser et créer les pages
+
+login
+affichage des produits
+page édition produit
+affichage un produit + commentaire
+Ajout commande
+page user + affichage des commandes
+Stats
+
+
+
